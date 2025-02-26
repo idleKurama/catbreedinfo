@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cat Breeds</title>
+    <link href="https://fonts.googleapis.com/css2?family=Arsenal+SC:ital,wght@0,400;0,700;1,400;1,700&family=Moon+Dance&display=swap" rel="stylesheet">
+    <style>
+        hr {
+            border: solid;
+            color: black;
+            border-width: 2px;
+        }
+        h1 {
+            font-size: 130px;
+            margin: 0;
+            font-family: "Moon Dance", serif;
+            font-weight: 500;
+            font-style: normal;
+            display: inline-block;
+            padding: 10px 90px;
+            background-color: beige;
+            border-radius: 60px;
+            text-decoration-line: underline;
+            text-decoration-thickness: 2px;
+            border: solid;
+            border-width: thin;
+        }
+        h2 {
+            font-family: "Arsenal SC", serif;
+            font-weight: bold;
+            font-style: normal;
+            font-size: 50px;
+            margin: 0;
+            text-decoration: underline;
+            text-decoration-thickness: 2px;
+        }
+        h3 {
+            font-size: 25px;
+            font-family: "Arsenal SC", serif;
+            font-weight: bold;
+            font-style: normal;
+        }
+        body { 
+            font-family: Arial, sans-serif; 
+            text-align: center; 
+            background-image: url("https://img.freepik.com/premium-vector/cute-cat-doodle-line-art-different-poses_6997-3640.jpg");
+        }
+        .container { 
+            flex-wrap: wrap; 
+            justify-content: center; 
+            gap: 20px; 
+            margin-top: 20px; 
+        }
+        .card { 
+            width: 200px; 
+            cursor: pointer; 
+            border: 2px solid hsl(0, 4%, 20%); 
+            padding: 10px; 
+            border-radius: 8px; 
+            transition: transform 0.3s, box-shadow 0.3s;
+            background-color: beige;
+        }
+        .card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        .card img { 
+            width: 100%; 
+            height: 200px; 
+            object-fit: fill; 
+            border-radius: 8px; 
+            border: 2px solid hsl(0, 4%, 20%);
+        }
+        .modal { 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            background: rgba(0, 0, 0, 0.7); 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-content { 
+            background: white; 
+            padding: 20px; 
+            width: 50%; 
+            max-height: 90vh; 
+            overflow-y: auto; 
+            border-radius: 8px; 
+            text-align: left;
+            position: relative;
+            background-color: beige;
+        }
+        .close { 
+            cursor: pointer;
+            position: absolute;
+            top: 2%;
+            right: 1px;
+            font-size: 50px;
+            color: black;
+            display: inline-block;
+            border: solid;
+            border-radius: 60px;
+            height: 54px;
+        }
+        .modal img { 
+            width: 96%; 
+            height: 90%; 
+            border-radius: 8px; 
+            margin-bottom: 10px; 
+            border: solid;
+            border-width: medium;
+        }
+        p {
+            font-size: 25px;
+        }
+    </style>
+</head>
+        <h1>Cat Breeds</h1>
+    <div class="container" id="cat-container"></div>
+    
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            fetch("https://api.thecatapi.com/v1/breeds")
+                .then(response => response.json())
+                .then(data => {
+                    displayBreeds(data);
+                    document.getElementById("cat-container").style.display = "flex";
+                });
+        });
+
+        function displayBreeds(breeds) {
+            const container = document.getElementById("cat-container");
+            breeds.forEach(breed => {
+                if (breed.reference_image_id) {
+                    fetch(`https://api.thecatapi.com/v1/images/${breed.reference_image_id}`)
+                        .then(response => response.json())
+                        .then(imageData => {
+                            const imageUrl = imageData.url || "";
+                            const card = document.createElement("div");
+                            card.className = "card";
+                            card.innerHTML = `
+                                <img src="${imageUrl}" alt="${breed.name}">
+                                <h3>${breed.name}</h3>
+                            `;
+                            card.onclick = () => showDetails(breed, imageUrl);
+                            container.appendChild(card);
+                        });
+                }
+            });
+        }
+
+        function showDetails(breed, imageUrl) {
+            const modal = document.createElement("div");
+            modal.className = "modal";
+            modal.id = "modal";
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <span class="close" onclick="closeModal()">&times;</span>
+                    <img id="breed-image" src="${imageUrl}" alt="Breed Image">
+                    <h2 id="breed-name">${breed.name}</h2>
+                    <p><strong>Origin:</strong> <span id="breed-origin">${breed.origin}</span></p>
+                    <p><strong>Temperament:</strong> <span id="breed-temperament">${breed.temperament}</span></p>
+                    <p><strong>Life Span:</strong> <span id="breed-lifespan">${breed.life_span}</span></p>
+                    <p id="breed-description">${breed.description}</p>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            modal.style.display = "flex";
+        }
+
+        function closeModal() {
+            const modal = document.getElementById("modal");
+            if (modal) modal.remove();
+        }
+    </script>
+</body>
+</html>
